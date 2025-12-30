@@ -1,13 +1,11 @@
 import { configureStore,EnhancedStore } from '@reduxjs/toolkit'
 import sideBarReducer from "./featuresSlice/slideBarSlice"
 import userState from './featuresSlice/userDetails'
-import subSideBar from './featuresSlice/subSideBarSlice'
 export const makeStore= ():EnhancedStore => {
   return configureStore({
     reducer: {
         sideBar:sideBarReducer,
         user:userState,
-        subSideBar:subSideBar
     }
   })
 }
