@@ -1,0 +1,42 @@
+{
+  "name": "http-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": " node --loader ts-node/esm src/index.ts",
+    "build": "tsc -b",
+    "start": "node  dist/index.js --port 3010"
+  },
+  "dependencies": {
+    "@eventstore/db-client": "^6.2.1",
+    "mongodb": "workspace:*",
+    "axios": "^1.13.2",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@swc/core": "^1.15.3",
+    "@swc/helpers": "^0.5.17",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "ts-node": "^10.9.2",
+    "ts-node-esm": "^0.0.6",
+    "tsc-node": "^0.0.3",
+    "types": "workspace:*",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

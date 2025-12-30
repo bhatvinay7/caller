@@ -1,0 +1,35 @@
+# Ignore common build and development files
+Dockerfile
+dockerfile.dev.yaml
+docker-compose.dev.yaml
+.dockerignore
+.next
+*/next
+.github
+.git
+.gitignore
+.project
+data
+nginx
+.vscode
+.idea/
+node_modules
+*/node_modules
+**/node_modules
+
+# Ignore cache and log files
+.cache/
+*.log
+npm-debug.log
+npm-debug.log.*
+ldpa
+# macOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+
+# Build output directories
+build/
+out/
+target/
