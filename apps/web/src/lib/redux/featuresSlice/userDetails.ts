@@ -1,7 +1,7 @@
 // store/sidebarSlice.ts
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
-import { getUserDetail } from "../../../../../../../payu/apps/web/src/utils/getUserDetail";
+import { getUserDetail } from "../../../utils/getUserDetail";
 import { userCredentials } from "types";
 interface UserState extends userCredentials {
   state?: "pending" | "loading" | "succeeded" | "failed";
