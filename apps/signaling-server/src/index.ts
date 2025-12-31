@@ -8,7 +8,7 @@ const PORT = 8080
 const app = express();
 import { authVerify } from './auth.verify';
 const server = createServer(app);
-const Status=["calling","connecting","disconnected","connected"] as const
+const Status= ["calling","connecting","disconnected","connected"] as const
 const io = new Server(server, {
   pingInterval: 25000,
   pingTimeout: 15000,
