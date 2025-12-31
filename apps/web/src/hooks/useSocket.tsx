@@ -15,14 +15,9 @@ function backOffDelay(retry: number) {
   return Math.min(2 ** retry * BASE_DELAY, MAX_DELAY);
 }
 
-export default function useSocketConnection({
-  props,
-}: {
-  props: {
-    channelId: string;
-    receiveMessage: (payload: Message) => void;
-  };
-}): {
+export default function useSocketConnection(channelId: string,
+    receiveMessage: (payload: Message) => void
+  ): {
   socket: Socket | null;
   sendMessage: (payload: { channelId: string; message: string }) => void;
   initiateCall: (payload: {
@@ -59,24 +54,24 @@ export default function useSocketConnection({
 
       socket.emit("register", {
         userId: user.userId,
-        channelId: props.channelId ?? null,
+        channelId: channelId ?? null,
       });
     });
 
     socket.on("message", (data: Message) => {
-      props.receiveMessage(data);
+      receiveMessage(data);
     });
 
     socket.on("call", (data: Message) => {
-      props.receiveMessage(data);
+      receiveMessage(data);
     });
 
     socket.on("end-call", (data: Message) => {
-      props.receiveMessage(data);
+      receiveMessage(data);
     });
 
     socket.on("ice-candidate", (data: Message) => {
-      props.receiveMessage(data);
+      receiveMessage(data);
     });
 
     socket.on("disconnect", () => {
@@ -91,7 +86,7 @@ export default function useSocketConnection({
         connectSocket();
       }, delay);
     });
-  }, [user?.userId, props.channelId]);
+  }, [user?.userId, channelId]);
 
   useEffect(() => {
     connectSocket();
