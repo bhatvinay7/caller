@@ -2,6 +2,7 @@ import mongoose, { Schema, Types, model } from "mongoose";
 
 export interface IChannel {
   users: Types.ObjectId[];
+  
 }
 
 export interface IMessage {
