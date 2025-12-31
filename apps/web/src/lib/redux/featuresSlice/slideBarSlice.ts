@@ -1,12 +1,12 @@
 // store/sidebarSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { RootState}   from '../store'
-type Sidebar = {
+import type { RootState } from '../store'
+export type Sidebar = {
   isOpen: boolean
 }
 
 const initialState: Sidebar = {
-  isOpen:true
+  isOpen: true
 }
 
 export const sidebarSlice = createSlice({
@@ -14,14 +14,14 @@ export const sidebarSlice = createSlice({
   initialState,
   reducers: {
     toggleSidebar(state, action: PayloadAction<boolean>) {
-       
-      state.isOpen =action.payload
+
+      state.isOpen = action.payload
     }
   }
 })
 
 // Export the action
 export const { toggleSidebar } = sidebarSlice.actions
-export const sideBarState=(state:RootState)=>state.sideBar.isOpen
+export const sideBarState = (state: RootState) => state.sideBar.isOpen
 // Export the reducer
 export default sidebarSlice.reducer

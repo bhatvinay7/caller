@@ -2,10 +2,18 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { getUserDetail } from "../../../utils/getUserDetail";
-import { userCredentials } from "types";
-interface UserState extends userCredentials {
-  state?: "pending" | "loading" | "succeeded" | "failed";
+
+export interface UserState {
+  username: string | null;
+  email: string | null;
+  userId: string | null;
+  picture: string | null;
+  isVerified: boolean;
+  token: string | null;
+  state: "idle" | "loading" | "succeeded" | "failed" | "pending";
+  error: string | null;
 }
+
 const initialState: UserState = {
   username: "",
   userId: "",
@@ -14,6 +22,7 @@ const initialState: UserState = {
   token: "",
   isVerified: false,
   state: "pending",
+  error: null,
 };
 
 export const getUser_details = createAsyncThunk(
