@@ -6,7 +6,7 @@ import { getAudioStream } from "../webRtc/getStreamAccess";
 import { createPeerConnection } from "../webRtc/connect-to-peer";
 import { iceconfig } from "../webRtc/connection";
 import useSocketConnection from "../hooks/useSocket";
-
+import useUserDetail from "../hooks/usegetUserInfo"
 export type UseAudioCallReturn = {
   startCall: (remoteAudioRef: RefObject<HTMLAudioElement>) => Promise<void>;
   addRemoteIce: (candidate: RTCIceCandidateInit) => Promise<void>;
@@ -14,14 +14,15 @@ export type UseAudioCallReturn = {
   socket: Socket | null;
 };
 
-export default function useAudioCall(): UseAudioCallReturn {
+export default function useAudioCall(channelId:string,receiverId:string): UseAudioCallReturn {
+  const user=useUserDetail()
   const pcRef = useRef<RTCPeerConnection | null>(null);
 
   function receiveMessage(payload: { message: string; type: string }) {
     console.log(payload);
   }
 
-  const { socket } = useSocketConnection("6uy47", receiveMessage);
+  const { socket } = useSocketConnection(channelId, receiveMessage,user);
 
   const startCall = useCallback(
     async (remoteAudioRef: RefObject<HTMLAudioElement>) => {
@@ -31,7 +32,7 @@ export default function useAudioCall(): UseAudioCallReturn {
       if (!localStream) return;
 
       const { pc, createOfferAndSend, addIceCandidate } =
-        createPeerConnection(iceconfig, socket, localStream);
+        createPeerConnection(iceconfig, socket, localStream,user,receiverId);
 
       pcRef.current = pc;
 

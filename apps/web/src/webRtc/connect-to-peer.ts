@@ -1,9 +1,11 @@
 import { Socket } from "socket.io-client";
-
+import { userCredentials } from "types";
 export function createPeerConnection(
   config: RTCConfiguration,
   signaler: Socket|null,
-  localStream: MediaStream
+  localStream: MediaStream,
+  user:userCredentials,
+  receiverId:string 
 ) {
   const pc: RTCPeerConnection = new RTCPeerConnection(config);
 
@@ -21,7 +23,7 @@ export function createPeerConnection(
   // ICE candidates generation
   pc.onicecandidate = (event: RTCPeerConnectionIceEvent) => {
     if (event.candidate) {
-      signaler?.emit("ice-candidate", event.candidate.toJSON());
+      signaler?.emit("ice-candidate",{toUserId:receiverId,candidate: event.candidate.toJSON()});
     }
   };
 
@@ -38,12 +40,13 @@ export function createPeerConnection(
   const createOfferAndSend = async () => {
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
-    signaler?.emit("offer", offer);
+    signaler?.emit("offer",{caller:user.userId,toUser:receiverId, offer});
   };
 
   // Handle remote answer
-  signaler?.on("answer", async (answer: RTCSessionDescriptionInit) => {
-    await pc.setRemoteDescription(answer);
+  signaler?.on("answer", async (from:string,
+  offer: RTCSessionDescriptionInit) => {
+    await pc.setRemoteDescription(offer);
   });
 
   // Handle ICE from remote
