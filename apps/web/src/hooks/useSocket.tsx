@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
-import useUserDetail from "./usegetUserInfo";
+import { userCredentials } from "types";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL!;
 
@@ -16,8 +16,8 @@ function backOffDelay(retry: number) {
 }
 
 export default function useSocketConnection(channelId: string,
-    receiveMessage: (payload: Message) => void
-  ): {
+  receiveMessage: (payload: Message) => void, user: userCredentials
+): {
   socket: Socket | null;
   sendMessage: (payload: { channelId: string; message: string }) => void;
   initiateCall: (payload: {
@@ -36,7 +36,6 @@ export default function useSocketConnection(channelId: string,
   const retryRef = useRef(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const user = useUserDetail();
 
   const connectSocket = useCallback(() => {
     if (!user?.userId) return;
@@ -54,7 +53,8 @@ export default function useSocketConnection(channelId: string,
 
       socket.emit("register", {
         userId: user.userId,
-        channelId: channelId ?? null,
+        channelId: channelId,
+        token:user.token
       });
     });
 
@@ -73,7 +73,12 @@ export default function useSocketConnection(channelId: string,
     socket.on("ice-candidate", (data: Message) => {
       receiveMessage(data);
     });
-
+    socket.on("call-reject", (data: Message) => {
+      receiveMessage(data);
+    });
+    socket.on("call-active", (data: Message) => {
+      receiveMessage(data);
+    });
     socket.on("disconnect", () => {
       socketRef.current = null;
 
