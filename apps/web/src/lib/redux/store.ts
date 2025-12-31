@@ -1,17 +1,17 @@
-import { configureStore,EnhancedStore } from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import sideBarReducer from "./featuresSlice/slideBarSlice"
 import userState from './featuresSlice/userDetails'
-export const makeStore= ():EnhancedStore => {
-  return configureStore({
-    reducer: {
-        sideBar:sideBarReducer,
-        user:userState,
-    }
-  })
-}
+import themeReducer from "./featuresSlice/themeSlice"
 
-// Infer the type of makeStore
-export type AppStore = ReturnType<typeof makeStore>
+export const store = configureStore({
+  reducer: {
+    sideBar: sideBarReducer,
+    user: userState,
+    theme: themeReducer,
+  }
+})
+
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<AppStore['getState']>
-export type AppDispatch = AppStore['dispatch']
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch
+export type AppStore = typeof store
