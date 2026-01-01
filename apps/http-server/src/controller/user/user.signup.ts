@@ -1,6 +1,6 @@
 import {Response,Request} from "express"
 import { UserSignup, userSchema } from "../../zodvalidator/validator.js"
-import User from "mongodb"
+import {User} from "mongodb"
 export const userSignup=async(req:Request,res:Response)=>{
     try{
      const data:UserSignup=req.body   

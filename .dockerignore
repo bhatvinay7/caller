@@ -2,6 +2,7 @@
 Dockerfile
 dockerfile.dev.yaml
 docker-compose.dev.yaml
+*/tsconfig.tsbuildinfo
 .dockerignore
 .next
 */next
