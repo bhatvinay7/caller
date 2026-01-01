@@ -2,7 +2,7 @@ import { Response } from "express"
 import { Channel } from "mongodb"
 import mongoose from "mongoose";
 import { AuthRequest } from 'types'
-export const joinRoom = async (req:AuthRequest, res: Response) => {
+export const joinRoom = async (req: AuthRequest, res: Response) => {
     try {
         const roomId = req.body
         const user = req.user
@@ -11,10 +11,10 @@ export const joinRoom = async (req:AuthRequest, res: Response) => {
         }
         const room = await Channel.findOne({ roomId: roomId })
         if (!room) {
-            const newRoom = await Channel.create(
+            const newRoom = await Channel.create({
                 roomId,
-                { $addToSet: { users: new mongoose.Types.ObjectId(user.userId) } },
-                { new: true }
+                users: [new mongoose.Types.ObjectId(user.userId)]
+            }
             )
             return res.status(201).json({ message: `New room created with roomId ${newRoom.roomId}` })
         }

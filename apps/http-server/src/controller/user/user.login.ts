@@ -2,7 +2,7 @@ import { Response, Request } from "express"
 import { UserLogin, userLoginSchema } from "../../zodvalidator/validator.js"
 import dotenv from "dotenv"
 import bcrypt from "bcrypt"
-import User from "mongodb"
+import {User} from "mongodb"
 import Jwt from "jsonwebtoken"
 dotenv.config()
 const SECRET = process.env.SECRET!
