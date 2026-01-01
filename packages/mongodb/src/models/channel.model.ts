@@ -1,18 +1,19 @@
-import mongoose, { Schema, Types, model } from "mongoose";
-export interface IChannel {
-  users: Types.ObjectId[],
+import mongoose, { Schema, Types, model,Document } from "mongoose";
+import {user,userSchema} from "./user.model.js"
+export interface IChannel extends Document  {
+  users: user[],
   roomId:String
 
 }
 
-export interface IMessage {
+export interface IMessage extends Document  {
   roomId: String;
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
   message: string;
 }
 
-export interface IAudio {
+export interface IAudio extends Document {
   roomId: String;
   mimeType: string;
   audioBuffer: Buffer;
@@ -21,13 +22,7 @@ export interface IAudio {
 
 const channelSchema = new Schema<IChannel>(
   {
-    users: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-    ],
+    users: [userSchema],
     roomId:{type:String,required: true,unique:true,trim:true}
   },
   { timestamps: true }
