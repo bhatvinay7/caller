@@ -1,0 +1,59 @@
+services:
+  # web:
+    # container_name: web
+    # build:
+      # context: .
+      # dockerfile: apps/web/dockerfile.dev.yaml
+    # ports:
+      # - "3000:3000"
+    # env_file:
+      # -  ./apps/web/.env
+    # networks:
+      # - caller
+    # deploy:
+      # resources:
+        # limits:
+          # cpus: '1.5'
+          # memory: 2G     
+  http-server:
+    container_name: http-server
+    build:
+      context: .
+      dockerfile: apps/http-server/dockerfile.dev.yaml 
+    restart: unless-stopped
+    env_file:
+      - ./apps/http-server/.env
+       
+    ports:
+      - "3002:3002"  
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 1G    
+
+
+    networks:
+      - caller
+  signaling-server:
+    container_name: signaling-server
+    build:
+      context: .
+      dockerfile: apps/signaling-server/dockerfile.dev.yaml 
+    restart: unless-stopped
+    env_file:
+      - ./apps/signaling-server/.env
+       
+    ports:
+      - "3002:3002"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 1G    
+    networks:
+    - caller    
+networks:
+  caller:
+    name: caller
+    driver: bridge
