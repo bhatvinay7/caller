@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import User from "./models/user.model.js"
+import { Channel,Audio,Message} from "./models/channel.model.js"
 dotenv.config();
 let retryAttempt = 0;
 
@@ -57,4 +58,4 @@ export default async function connectToDB(): Promise<typeof mongoose> {
     }
     return connectDB();
 }
-export {User}
+export {User,Channel,Audio,Message}
