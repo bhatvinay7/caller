@@ -1,12 +1,13 @@
 "use client";
 import { useState, useRef } from "react";
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from "chat-ui";
+import {toast} from "sonner"
 
 function generateRoomId() {
   return Math.random().toString(36).substring(2, 10);
 }
 
-export default function ChatRoomUI() {
+export default  function ChatRoomUI() {
   const [roomId, setRoomId] = useState<string>("");
   const [joinRoomId, setJoinRoomId] = useState<string>("");
   const joinInputRef = useRef<HTMLInputElement>(null);
@@ -15,21 +16,21 @@ export default function ChatRoomUI() {
     const id = generateRoomId();
     setRoomId(id);
     await navigator.clipboard.writeText(id);
-    // toast.success("Room created & copied to clipboard");
+    toast.success("Room created & copied to clipboard");
   };
 
   const joinRoom = () => {
     if (!joinRoomId.trim()) {
-    //   toast.error("Please enter a room ID");
+    toast.error("Please enter a room ID");
       return;
     }
 
     // navigation / socket join logic goes here
-    // toast.success(`Joined room ${joinRoomId}`);
+    toast.success(`Joined room ${joinRoomId}`);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted p-4">
+    <div className="min-h-screen relative flex items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="text-xl text-center">Chat Rooms</CardTitle>
@@ -37,7 +38,7 @@ export default function ChatRoomUI() {
         <CardContent className="space-y-6">
           {/* Create Room */}
           <div className="space-y-2">
-            <Button className="w-full" onClick={createRoom}>
+            <Button className="w-full cursor-pointer" onClick={createRoom}>
               Create Room
             </Button>
             {roomId && (
@@ -52,14 +53,16 @@ export default function ChatRoomUI() {
                 ref={joinInputRef}
                 placeholder="Enter Room ID"
                 value={joinRoomId}
+                className="w-full border border-black/12 bg-slate-300"
                 onChange={(e) => setJoinRoomId(e.target.value)}
               />
               <Button
                 type="button"
                 variant="outline"
+                className="w-full border border-black/12 cursor-pointer bg-slate-300"
                 onClick={async () => {
                   if (!joinRoomId.trim()) {
-                    // toast.error("Nothing to copy");
+                    toast.error("Nothing to copy");
                     return;
                   }
 
@@ -71,16 +74,16 @@ export default function ChatRoomUI() {
                     }
 
                     await navigator.clipboard.writeText(joinRoomId);
-                    // toast.success("Room ID copied");
+                    toast.success("Room ID copied");
                   } catch (err) {
-                    // toast.error("Copy failed – browser blocked clipboard");
+                    toast.error("Copy failed – browser blocked clipboard");
                   }
                 }}
               >
                 Copy
               </Button>
             </div>
-            <Button variant="secondary" className="w-full" onClick={joinRoom}>
+            <Button variant="secondary" className="w-full border border-black/12 cursor-pointer bg-slate-300" onClick={joinRoom}>
               Join Room
             </Button>
           </div>
