@@ -1,19 +1,19 @@
 import mongoose, { Schema, Types, model } from "mongoose";
-
 export interface IChannel {
-  users: Types.ObjectId[];
-  
+  users: Types.ObjectId[],
+  roomId:String
+
 }
 
 export interface IMessage {
-  channelId: Types.ObjectId;
+  roomId: String;
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
   message: string;
 }
 
 export interface IAudio {
-  channelId: Types.ObjectId;
+  roomId: String;
   mimeType: string;
   audioBuffer: Buffer;
 }
@@ -28,6 +28,7 @@ const channelSchema = new Schema<IChannel>(
         required: true,
       },
     ],
+    roomId:{type:String,required: true,unique:true,trim:true}
   },
   { timestamps: true }
 );
@@ -35,8 +36,8 @@ const channelSchema = new Schema<IChannel>(
 
 const messageSchema = new Schema<IMessage>(
     {
-        channelId: {
-            type: Schema.Types.ObjectId,
+        roomId: {
+            type: String,
             ref: "Channel",
             required: true,
         },
@@ -61,8 +62,8 @@ const messageSchema = new Schema<IMessage>(
 
 const audioSchema = new Schema<IAudio>(
     {
-        channelId: {
-            type: Schema.Types.ObjectId,
+        roomId: {
+            type: String,
             ref: "Channel",
             required: true,
         },
@@ -78,7 +79,7 @@ const audioSchema = new Schema<IAudio>(
     { timestamps: true }
 );
 
-
-export const Channel = model<IChannel>("Channel", channelSchema);
-export const Audio = model<IAudio>("Audio", audioSchema);
-export const Message = model<IMessage>("Message", messageSchema);
+channelSchema.index({ users: 1 });
+export const Channel = mongoose.model<IChannel>("Channel", channelSchema);
+export const Audio = mongoose.model<IAudio>("Audio", audioSchema);
+export const Message = mongoose.model<IMessage>("Message", messageSchema);
