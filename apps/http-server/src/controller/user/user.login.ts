@@ -5,7 +5,7 @@ import bcrypt from "bcrypt"
 import {User} from "mongodb"
 import Jwt from "jsonwebtoken"
 dotenv.config()
-const SECRET = process.env.SECRET!
+const SECRET = process.env.JWT_SECRET!
 export const userLogin = async (req: Request, res: Response) => {
     try {
         const data: UserLogin = req.body

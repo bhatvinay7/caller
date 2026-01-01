@@ -2,7 +2,7 @@
   "name": "signaling-server",
   "version": "1.0.0",
   "description": "",
-  "tyoe":"module",
+  "type":"module",
   "main": "dist/index.js",
   "scripts": {
   "dev": " node --loader ts-node/esm src/index.ts",

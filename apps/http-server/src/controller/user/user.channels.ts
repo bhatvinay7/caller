@@ -6,8 +6,12 @@ export const fetchUserRooms = async (req:AuthRequest, res: Response) => {
     try {
         const user = req.user
         const channels = await Channel.find({
-            users: new mongoose.Types.ObjectId(user.userId)
-        });
+      users: new mongoose.Types.ObjectId(user.userId),
+    })
+    .populate({
+      path: "users",
+      select: "_id name",
+    });
         return res.status(200).json(channels)
     }
     catch (error: any) {

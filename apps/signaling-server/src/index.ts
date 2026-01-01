@@ -6,7 +6,7 @@ dotenv.config()
 const FRONT_CLIENT_URL = process.env.FRONT_CLIENT_URL!
 const PORT = 8080
 const app = express();
-import { authVerify } from './auth.verify';
+import { authVerify } from './auth.verify.js';
 const server = createServer(app);
 const Status= ["calling","connecting","disconnected","connected"] as const
 const io = new Server(server, {
