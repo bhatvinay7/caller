@@ -29,12 +29,38 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.25'
+          cpus: '0.45'
           memory: 1G    
-
-
     networks:
       - caller
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootpassword
+      - MONGO_INITDB_DATABASE=api
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - caller
+    healthcheck:
+      test:
+        [
+         "CMD",
+         "mongosh",
+         "mongodb://root:rootpassword@localhost:27017/admin",
+         "--quiet",
+         "--eval",
+         "db.runCommand({ ping: 1 }).ok"
+       ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
   signaling-server:
     container_name: signaling-server
     build:
@@ -45,7 +71,7 @@ services:
       - ./apps/signaling-server/.env
        
     ports:
-      - "3002:3002"
+      - "8080:8080"
     deploy:
       resources:
         limits:
@@ -57,3 +83,5 @@ networks:
   caller:
     name: caller
     driver: bridge
+volumes:
+  mongo_data:    
