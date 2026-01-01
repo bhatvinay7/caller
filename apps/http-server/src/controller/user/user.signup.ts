@@ -1,6 +1,7 @@
 import {Response,Request} from "express"
 import { UserSignup, userSchema } from "../../zodvalidator/validator.js"
-import {User} from "mongodb"
+import bcrypt from "bcrypt"
+import { User } from "mongodb"
 export const userSignup=async(req:Request,res:Response)=>{
     try{
      const data:UserSignup=req.body   
@@ -12,7 +13,8 @@ export const userSignup=async(req:Request,res:Response)=>{
      if(user){
         return res.status(409).json({message:["user already exists"]})
      }
-     await User.create({...data})
+     const password=bcrypt.hashSync(data.password, bcrypt.genSaltSync(10))
+     await User.create({...data,password:password})
      return res.status(201).json({message:"Signup successful"})
     }
     catch(error){

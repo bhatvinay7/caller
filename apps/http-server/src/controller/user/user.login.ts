@@ -21,17 +21,17 @@ export const userLogin = async (req: Request, res: Response) => {
         if (!isMatch) {
             return res.status(401).json({ message: [ "Invalid credentials"] });
         }
-        await User.create({ ...data })
-        const token = Jwt.sign({ userId: user._id, email: user.email }, SECRET, { expiresIn: '7d' })
+        const token = Jwt.sign({ userId: user._id, email: user.email }, SECRET, { expiresIn: '30d' })
         res.cookie('token', token, {
-            maxAge: 7 * 24 * 60 * 60,
-            domain: '/',
+            httpOnly: true,
+            maxAge: 2592000,
             secure: true,
             sameSite: 'none',
         });
     return res.status(200).json({message:"Login successful"})    
     }
     catch (error) {
+        console.log(error)
         return res.status(500).json({ message: ["server error,please try again!"] })
     }
 }

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt"
 export const userSchema=z.object({
     username: z.string().min(2,"Enter your name"),
     email: z.email({ pattern: z.regexes.email, }),
-    password: z.string().min(6,"Password should have 6 cherater").transform((password) => bcrypt.hashSync(password, bcrypt.genSaltSync(10))),
+    password: z.string().min(6,"Password should have 6 cherater")
 })
 
 export const userLoginSchema = z.object({
