@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import sideBarReducer from "./featuresSlice/slideBarSlice"
 import userState from './featuresSlice/userDetails'
+import userActionReducer from  "./featuresSlice/userActionSlice"
 import themeReducer from "./featuresSlice/themeSlice"
 
 export const store = configureStore({
@@ -8,6 +9,7 @@ export const store = configureStore({
     sideBar: sideBarReducer,
     user: userState,
     theme: themeReducer,
+    userAction: userActionReducer
   }
 })
 

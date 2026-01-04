@@ -50,14 +50,14 @@
 }
 
 :root {
-  --background: #ffffff;
+  --background: #b1adad;
   --foreground: #171717;
 }
 
 .dark {
   color-scheme: dark;
   --background: #0a0a0a;
-  --foreground: #ededed;
+  --foreground: #aeaaaa;
 
   .imgLight {
     display: none;
@@ -81,4 +81,103 @@ body {
 
 .imgDark {
   display: none;
+}
+
+@keyframes call-slide-up-elastic {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translateY(-5%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-call-overlay-premium {
+  animation: call-slide-up-elastic 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mobile-call-bg {
+  background: radial-gradient(circle at top left, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
+}
+
+.dark .mobile-call-bg {
+  background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 100%);
+}
+
+.btn-classic-circle {
+  @apply rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg;
+}
+
+@keyframes call-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-call-overlay {
+  animation: call-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-ping-slow {
+  animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

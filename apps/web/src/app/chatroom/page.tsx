@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from "chat-ui";
 import {toast} from "sonner"
-
+import {joinroom} from "../../utils/joinRoom"
 function generateRoomId() {
   return Math.random().toString(36).substring(2, 10);
 }
@@ -15,18 +15,22 @@ export default  function ChatRoomUI() {
   const createRoom = async () => {
     const id = generateRoomId();
     setRoomId(id);
-    await navigator.clipboard.writeText(id);
     toast.success("Room created & copied to clipboard");
+    await navigator.clipboard.writeText(id);
   };
-
-  const joinRoom = () => {
+  
+  const joinRoom = async() => {
     if (!joinRoomId.trim()) {
-    toast.error("Please enter a room ID");
+      toast.error("Please enter a room ID");
       return;
     }
-
-    // navigation / socket join logic goes here
-    toast.success(`Joined room ${joinRoomId}`);
+    try{
+      const response=await joinroom(joinRoomId.trim())
+      toast.success(`Joined room ${joinRoomId}`);
+    }
+    catch(error){
+     toast.error("Error occured please try again!");
+    }
   };
 
   return (

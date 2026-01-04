@@ -5,7 +5,9 @@ import "./globals.css";
 import { Provider } from "react-redux";
 import { store } from "../lib/redux/store";
 import ThemeInitializer from "../components/theme-initializer";
-import {Toaster } from "chat-ui";
+import { Toaster } from "chat-ui";
+import IncomingCallPopup from "../components/IncomingCallPopup";
+import { SocketProvider } from "../context/SocketContext";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -25,8 +27,11 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
         <Provider store={store}>
           <ThemeInitializer>
-            {children}
-            <Toaster/>
+            <SocketProvider>
+              {children}
+              <Toaster />
+              <IncomingCallPopup />
+            </SocketProvider>
           </ThemeInitializer>
 
         </Provider>
