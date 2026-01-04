@@ -21,10 +21,10 @@ export const userLogin = async (req: Request, res: Response) => {
         if (!isMatch) {
             return res.status(401).json({ message: [ "Invalid credentials"] });
         }
-        const token = Jwt.sign({ userId: user._id, email: user.email }, SECRET, { expiresIn: '30d' })
+        const token = Jwt.sign({ userId: user._id, email: user.email }, SECRET, { expiresIn: '7d' })
         res.cookie('token', token, {
             httpOnly: true,
-            maxAge: 2592000,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
             secure: true,
             sameSite: 'none',
         });
