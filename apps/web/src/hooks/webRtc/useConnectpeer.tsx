@@ -27,14 +27,15 @@ export type UseConnectionPeerReturn = {
   handleAnswer: (payload: AnswerPayload) => Promise<void>;
   stopCall: () => void;
   reSendOffer: () => void;
-  lastOffer: RTCSessionDescriptionInit | null;
+  reSendAnswer: () => void;
 };
 
 export function useConnectionPeer(
   user: userCredentials,
   receiverId: string,
   channelId: string,
-  onSignal: (event: string, payload: any) => void
+  onSignal: (event: string, payload: any) => void,
+  onSignalACK:(event:string,payload:any,ack:(err:any,response:{status:string,message:string})=>void)=>void
 ): UseConnectionPeerReturn {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const pendingIceRef = useRef<RTCIceCandidateInit[]>([]);
@@ -43,8 +44,13 @@ export function useConnectionPeer(
   const onSignalRef = useRef(onSignal);
   const { action } = useUserAction()
   const lastOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
+   const lastAnswerRef = useRef<RTCSessionDescriptionInit | null>(null);
+  const reTryIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const iceConfig = useIceConfig();
   const [sessionKey, setSessionKey] = useState(0);
+  const answerRetryCountRef = useRef(0);
+  const isAnswerInFlightRef = useRef(false);
+  const MAX_RETRIES = 3;
 
   useEffect(() => {
     onSignalRef.current = onSignal;
@@ -126,10 +132,14 @@ export function useConnectionPeer(
     const pc = pcRef.current;
     console.log("[useConnectionPeer] handleOffer called. signalingState:", pc?.signalingState);
     if (!pc) return;
+    // if (pc.signalingState === "have-remote-offer") {
+    //  console.warn("[Receiver] Offer received while pending answer");
+    //  return;
+    // }
     try {
       await pc.setRemoteDescription(payload.offer);
       console.log("[useConnectionPeer] setRemoteDescription success. new state:", pc.signalingState);
-
+      
       for (const c of pendingIceRef.current) {
         await pc.addIceCandidate(c);
       }
@@ -144,6 +154,10 @@ export function useConnectionPeer(
     console.log("[useConnectionPeer] handleAnswer called. signalingState:", pc?.signalingState);
     if (!pc) return;
     try {
+      // if(reTryIntervalRef.current){
+        // clearTimeout(reTryIntervalRef.current)
+        // reTryIntervalRef.current=null
+      // }
       await pc.setRemoteDescription(payload.answer);
       console.log("[useConnectionPeer] setRemoteDescription (answer) success. new state:", pc.signalingState);
 
@@ -156,6 +170,30 @@ export function useConnectionPeer(
     }
   }, []);
 
+// --------------------------------------------------------------------- retryOffer
+  const retryOffer = useCallback(async () => {
+    if (pcRef?.current?.signalingState !== "have-local-offer") return;
+
+    console.warn("[Caller] Retrying offer...");
+    try {
+
+      await pcRef.current.setLocalDescription({ type: "rollback" });
+
+      lastOfferRef.current = null;
+      const newOffer = await pcRef.current.createOffer();
+      await pcRef.current.setLocalDescription(newOffer);
+
+     lastOfferRef.current = newOffer;
+         onSignalRef.current("offer", {
+     toUserId: receiverId,
+     channelId,
+     offer: lastOfferRef.current,
+   });
+    } catch (err) {
+      console.error("[Caller] Retry offer failed", err);
+    }
+  }, [pcRef.current, onSignalRef.current,receiverId,channelId]);
+// --------------------------------------------------------------------- start call
   const startCall = useCallback(
     async (
       remoteAudioRef: RefObject<HTMLAudioElement>
@@ -186,10 +224,61 @@ export function useConnectionPeer(
         channelId,
         offer,
       });
+      // reTryIntervalRef.current=setInterval(()=>{
+        // retryOffer()
+      // },10000)
     },
     [receiverId, channelId, user.userId]
   );
+// ------------------------------------------------------------------------------------------
+//safeAnswerRetry
+const sendAnswerWithRetry = useCallback((answer:RTCSessionDescriptionInit) => {
+  if (isAnswerInFlightRef.current) return;
 
+  isAnswerInFlightRef.current = true;
+
+  const trySend = () => {
+    console.log(
+      `[Answer] Sending attempt ${answerRetryCountRef.current + 1}`
+    );
+
+    onSignalACK(
+      "answer",
+      {
+        toUserId: receiverId,
+        channelId,
+        answer,
+      },
+      (err:any,response) => {
+        if (!err) {
+          console.log("[Answer] ACK received");
+          isAnswerInFlightRef.current = false;
+          answerRetryCountRef.current = 0;
+          return;
+        }
+        answerRetryCountRef.current++;
+
+        if (answerRetryCountRef.current < MAX_RETRIES) {
+          console.warn("[Answer] ACK failed → retrying");
+          setTimeout(trySend, 500);
+        } else {
+          console.error("[Answer] Max retries reached");
+          isAnswerInFlightRef.current = false;
+          answerRetryCountRef.current = 0;
+
+          // retry for answerSend
+          reSendAnswer()
+        }
+      }
+    );
+  };
+
+  trySend();
+}, [receiverId, channelId,onSignalRef.current ]);
+
+
+
+// --------------------------------------------------------------------------------------------
   const createAnswerAndSend = useCallback(async (
     remoteAudioRef: RefObject<HTMLAudioElement>
   ) => {
@@ -198,7 +287,7 @@ export function useConnectionPeer(
     if (!pc) return;
 
     remoteAudioRefInt.current = remoteAudioRef;
-
+    
     if (!localStreamRef.current) {
       console.log("[useConnectionPeer] Fetching audio stream for receiver");
       const stream = await getAudioStream();
@@ -209,16 +298,26 @@ export function useConnectionPeer(
     }
 
     console.log("[useConnectionPeer] Creating answer. current state:", pc.signalingState);
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-
-    console.log("[useConnectionPeer] Emitting answer via onSignalRef");
-    onSignalRef.current("answer", {
-      toUserId: receiverId,
-      channelId,
-      answer,
-    });
-  }, [receiverId, channelId, user.userId]);
+    if(!lastAnswerRef.current){
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      lastAnswerRef.current=answer
+      console.log("[useConnectionPeer] Emitting answer via onSignalRef");
+      sendAnswerWithRetry(answer)
+      // onSignalRef.current("answer", {
+        // toUserId: receiverId,
+        // channelId,
+        // answer,
+      // });
+      // onSignalACK("answer",{ toUserId: receiverId,channelId,answer},(err,response)=>{
+        // 
+        // if(err){
+        //  reSendOffer()
+        // }
+      // })
+    }
+  }, [receiverId, channelId, user.userId,lastAnswerRef.current]);
+//-----------------------------------------------------------------------------------------------------------------
 
   const reSendOffer = useCallback(() => {
     if (lastOfferRef.current) {
@@ -230,6 +329,18 @@ export function useConnectionPeer(
       });
     }
   }, [receiverId, channelId]);
+
+   const reSendAnswer = useCallback(() => {
+   if (lastAnswerRef.current) {
+     console.log("[useConnectionPeer] Re-sending offer via onSignalRef");
+     onSignalRef.current("answer", {
+       toUserId: user.userId,
+       channelId,
+       offer: lastAnswerRef.current,
+     });
+   }
+ }, [user.userId, channelId]);
+
 
   const stopCall = useCallback(() => {
     console.log("[useConnectionPeer] stopCall initiated");
@@ -261,6 +372,7 @@ export function useConnectionPeer(
     // 3. Reset signaling state
     pendingIceRef.current = [];
     lastOfferRef.current = null;
+    lastAnswerRef.current=null
 
     // 4. Force re-initialization of the hook's internal logic
     setSessionKey(prev => prev + 1);
@@ -275,6 +387,6 @@ export function useConnectionPeer(
     handleAnswer,
     stopCall,
     reSendOffer,
-    lastOffer: lastOfferRef.current,
+    reSendAnswer
   };
 }
