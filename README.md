@@ -772,10 +772,6 @@ pnpm install --frozen-lockfile
 - [Next.js Documentation](https://nextjs.org/docs)
 - [pnpm Documentation](https://pnpm.io/)
 
-## 📄 License
-
-MIT
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
@@ -785,8 +781,3 @@ Contributions are welcome! Please:
 3. Commit your changes
 4. Push to the branch
 5. Open a Pull Request
-
-
-**Made with ❤️ for WebRTC enthusiasts**
-
-**Need Help?** Check the troubleshooting section or open an issue on GitHub.
