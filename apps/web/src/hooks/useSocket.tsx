@@ -41,6 +41,12 @@ export default function useSocketConnection(channelId: string, receiverId: strin
       socket.emit(event, payload);
     }
   }, [socket]);
+  const onSignalACK = useCallback((event: string, payload: any,ack:(err:any,response:{status:string,message:string})=>void) => {
+  if (socket) {
+    console.log(`[useSocket] Emitting signal with ack: ${event}`, payload);
+    socket.emit(event, payload,ack);
+  }
+}, [socket]);
 
   const {
     pc,
@@ -50,13 +56,15 @@ export default function useSocketConnection(channelId: string, receiverId: strin
     handleOffer,
     handleAnswer,
     reSendOffer,
+    reSendAnswer,
     stopCall,
-    lastOffer
   } = useConnectionPeer(
     user,
     receiverId || "",
     channelId,
-    onSignal
+    onSignal,
+    onSignalACK
+
   );
 
   useEffect(() => {
@@ -105,7 +113,7 @@ export default function useSocketConnection(channelId: string, receiverId: strin
 
     socket.on("offer", (data: any) => {
       console.log("[useSocket] Received offer", data);
-      socket.emit("ringing", { toUserId: data.from });
+      socket.emit("ringing", { toUserId: data.from,channelId });
 
       dispatch(setIncomingCall({
         from: data.from,
@@ -199,7 +207,7 @@ export default function useSocketConnection(channelId: string, receiverId: strin
     stopCall,
     endCall,
     reSendOffer,
-    lastOffer,
+    reSendAnswer,
     sendMessage
   };
 }

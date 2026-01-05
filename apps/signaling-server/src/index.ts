@@ -12,7 +12,7 @@ const PORT = 8080;
 const app = express();
 const server = createServer(app);
 
-const Status = ["calling", "connecting", "disconnected", "connected"] as const;
+const Status = ["calling", "ringing", "connecting","disconnected", "connected"] as const;
 
 const io = new Server(server, {
   pingInterval: 25000,
@@ -90,7 +90,7 @@ io.on("connection", (socket: Socket) => {
       }
 
       activeCallsMap.set(channelId, {
-        status: "connecting",
+       status: "ringing",
         startTime: Date.now(),
       });
 
@@ -100,35 +100,39 @@ io.on("connection", (socket: Socket) => {
       });
     }
   );
-
+// ackCallback:({status,message}:{status: string, message:string})=>void
   socket.on(
     "answer",
     ({
       toUserId,
       channelId,
       answer,
+      ackCallback
     }: {
       toUserId: string;
       channelId: string;
       answer: RTCSessionDescriptionInit;
-    }) => {
+      ackCallback:({status,message}:{status: string, message:string})=>void
+    },) => {
+
       const fromUser = socketUserMap.get(socket);
       console.log("emit answer")
       if (!fromUser) return;
 
       const targetSocket = userSocketMap.get(toUserId);
       if (!targetSocket) return;
-
+       if (typeof ackCallback === 'function') {
+       ackCallback({ status: 'ok', message: 'Server received your asnwer' });
       activeCallsMap.set(channelId, {
         status: "connected",
         startTime: Date.now(),
       });
-
+     
       targetSocket.emit("answer", {
         from: fromUser,
         answer,
       });
-    }
+}}
   );
 
   // ---------------- ICE ----------------
@@ -148,7 +152,7 @@ io.on("connection", (socket: Socket) => {
       if (!targetSocket) return;
 
       activeCallsMap.set(channelId, {
-        status: "connecting",
+        status: "ringing",
         startTime: Date.now(),
       });
 
@@ -191,12 +195,16 @@ io.on("connection", (socket: Socket) => {
 
   socket.on(
     "ringing",
-    ({ toUserId }: { toUserId: string }) => {
+    ({ toUserId,channelId }: { toUserId: string,channelId:string }) => {
       const targetSocket = userSocketMap.get(toUserId);
       if (targetSocket) {
         targetSocket.emit("ringing", {
           from: socketUserMap.get(socket),
         });
+          activeCallsMap.set(channelId, {
+    status: "ringing",
+    startTime: Date.now(),
+  });
       }
     }
   );
