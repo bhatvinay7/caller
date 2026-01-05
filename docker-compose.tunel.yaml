@@ -1,0 +1,72 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: webrtc_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=webrtc_caller
+    networks:
+      - webrtc_network
+
+  http-server:
+    build:
+      context: .
+      dockerfile: apps/http-server/Dockerfile
+    container_name: webrtc_http_server
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGO_URI=mongodb://mongodb:27017/webrtc_caller
+    env_file:
+      - apps/http-server/.env
+    depends_on:
+      - mongodb
+    networks:
+      - webrtc_network
+    restart: unless-stopped
+
+  signaling-server:
+    build:
+      context: .
+      dockerfile: apps/signaling-server/Dockerfile
+    container_name: webrtc_signaling_server
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+    env_file:
+      - apps/signaling-server/.env
+    networks:
+      - webrtc_network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: webrtc_web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - apps/web/.env
+    depends_on:
+      - http-server
+      - signaling-server
+    networks:
+      - webrtc_network
+    restart: unless-stopped
+
+networks:
+  webrtc_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
